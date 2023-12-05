@@ -1,0 +1,14 @@
+[tool.poetry]
+name = "ab180-test"
+version = "0.1.0"
+description = "For ab180 hiring test"
+authors = ["minshogi <me@minshogi.xyz>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.11"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
