@@ -3,12 +3,12 @@ import random
 
 import pytest
 
-from src.services.short_url_service import ShortUrlService
+from src.services.short_link_service import ShortLinkService
 
 
 @pytest.mark.asyncio
 async def test_is_alphanumeric(session, cache):
-    service = ShortUrlService(session, cache)
+    service = ShortLinkService(session, cache)
 
     # pseudo를 랜덤값으로 초기화
     pseudo = random.randint(0, 10**10)
@@ -21,7 +21,7 @@ async def test_is_alphanumeric(session, cache):
 
 @pytest.mark.asyncio
 async def test_controlling_concurrency_to_generate_unique_short_ids(session, cache):
-    service = ShortUrlService(session, cache)
+    service = ShortLinkService(session, cache)
     generated_ids = set()
 
     # pseudo를 랜덤값으로 초기화

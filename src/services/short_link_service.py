@@ -18,7 +18,7 @@ def _next_pseudo(p: int) -> int:
     return (p * multiple_factor + plus_factor) % mod_factor
 
 
-class ShortUrlService:
+class ShortLinkService:
     pkey = "pseudo"
     chars = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ1234567890"
 
@@ -84,13 +84,13 @@ class ShortUrlService:
         )
         return hashlib.md5(repr(url_dict).encode()).hexdigest()
 
-    async def get(self, short_id: str) -> models.ShortUrl | None:
+    async def get(self, short_id: str) -> models.ShortLink | None:
         return await self.session.scalar(
-            select(models.ShortUrl).where(models.ShortUrl.short_id == short_id)
+            select(models.ShortLink).where(models.ShortLink.short_id == short_id)
         )
 
-    def create(self, url_str: str) -> models.ShortUrl:
-        result = models.ShortUrl(
+    def create(self, url_str: str) -> models.ShortLink:
+        result = models.ShortLink(
             short_id=self._generate_short_id(),
             url_str=url_str,
             url_hash=self._url_to_hash(url_str),
@@ -99,9 +99,9 @@ class ShortUrlService:
         self.session.add(result)
         return result
 
-    async def find_exist(self, url_str: str) -> models.ShortUrl | None:
+    async def find_exist(self, url_str: str) -> models.ShortLink | None:
         return await self.session.scalar(
-            select(models.ShortUrl).where(
-                models.ShortUrl.url_hash == self._url_to_hash(url_str)
+            select(models.ShortLink).where(
+                models.ShortLink.url_hash == self._url_to_hash(url_str)
             )
         )

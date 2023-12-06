@@ -1,5 +1,5 @@
 from src.modules.camel_model import CamelModel
 
 
-class GenerateShortUrl(CamelModel):
+class GenerateShortLink(CamelModel):
     url: str

@@ -1,5 +1,5 @@
 from typing import Annotated
-import redis as redis
+import redis
 from fastapi import Depends
 from redlock import Redlock
 

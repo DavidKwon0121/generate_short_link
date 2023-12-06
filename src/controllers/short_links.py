@@ -1,22 +1,22 @@
 from fastapi import APIRouter, HTTPException
 from starlette.responses import JSONResponse, RedirectResponse
 
-from src.controllers.dto import GenerateShortUrl
+from src.controllers.dto import GenerateShortLink
 from src.modules.cache import CacheDepends
 from src.modules.database import AsyncSessionDepends
 from src.modules.utils import is_url_or_raise
-from src.services.short_url_service import ShortUrlService
+from src.services.short_link_service import ShortLinkService
 
 router = APIRouter(prefix="/short-links")
 
 
 @router.post("")
 async def _router_create(
-    data: GenerateShortUrl, session: AsyncSessionDepends, cache: CacheDepends
+    data: GenerateShortLink, session: AsyncSessionDepends, cache: CacheDepends
 ):
     url = data.url
     is_url_or_raise(url)
-    ss = ShortUrlService(session, cache)
+    ss = ShortLinkService(session, cache)
     ret = await ss.find_exist(url)
     if not ret:
         ret = ss.create(url)
@@ -26,8 +26,8 @@ async def _router_create(
 
 @router.get("/{short_id}")
 async def _router_get(short_id: str, session: AsyncSessionDepends, cache: CacheDepends):
-    ss = ShortUrlService(session, cache)
-    ret = await ss.get(short_id)
+    short_link = ShortLinkService(session, cache)
+    ret = await short_link.get(short_id)
     if ret:
         return JSONResponse(content=ret.return_camelize())
 
@@ -38,8 +38,8 @@ async def _router_get(short_id: str, session: AsyncSessionDepends, cache: CacheD
 async def _router_redirect(
     short_id: str, session: AsyncSessionDepends, cache: CacheDepends
 ):
-    ss = ShortUrlService(session, cache)
-    ret = await ss.get(short_id)
+    short_link = ShortLinkService(session, cache)
+    ret = await short_link.get(short_id)
     if ret:
         return RedirectResponse(url=ret.url_str, status_code=302)
 
