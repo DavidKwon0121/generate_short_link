@@ -13,6 +13,7 @@ RUN apt update -q && apt install git -qy && \
 
 COPY ./poetry.lock /app/
 COPY ./pyproject.toml /app/
+COPY ./__init__.py /app/__init__.py
 
 RUN poetry install --only main -v
 RUN pip install pydantic[dotenv] uvicorn[standard] gunicorn
