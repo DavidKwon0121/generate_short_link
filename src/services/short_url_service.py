@@ -94,7 +94,7 @@ class ShortUrlService:
             short_id=self._generate_short_id(),
             url_str=url_str,
             url_hash=self._url_to_hash(url_str),
-            created_at=datetime.utcnow(),
+            created_at=datetime.utcnow().replace(microsecond=0),
         )
         self.session.add(result)
         return result

@@ -1,21 +1,25 @@
+import asyncio
+
 import pytest
 import redis
 from asgi_lifespan import LifespanManager
 from httpx import AsyncClient
-from sqlalchemy import URL
+from sqlalchemy import URL, event
 from sqlalchemy.ext.asyncio import (
     create_async_engine,
     AsyncSession,
+    async_sessionmaker,
+    AsyncEngine,
 )
 
 from src.config import secret_settings
 from src.main import app
-from src.modules.database import Base
+from src.modules.database import database, Base
 
 
 @pytest.fixture(scope="session")
 @pytest.mark.asyncio
-async def async_engine_conn():
+async def async_engine() -> AsyncEngine:
     engine = create_async_engine(
         URL.create(
             drivername="mysql+aiomysql",
@@ -27,27 +31,53 @@ async def async_engine_conn():
             query={"charset": "utf8mb4"},
         ),
     )
-    async with engine.begin() as conn:
-        yield conn
-        for table in Base.metadata.tables.values():
-            await conn.execute(table.delete())
+
+    yield engine
 
 
 @pytest.fixture(scope="function")
 @pytest.mark.asyncio
-async def db(async_engine_conn):
-    async for conn in async_engine_conn:
+async def session(async_engine):
+    async with async_engine.connect() as conn:
+        await conn.begin()
+        await conn.begin_nested()
+
+        # 전체 스키마 생성
+        try:
+            await conn.run_sync(Base.metadata.create_all)
+        except:
+            pass
+
         async_session = AsyncSession(
             conn,
             expire_on_commit=False,
             autoflush=False,
         )
+
+        @event.listens_for(async_session.sync_session, "after_transaction_end")
+        def end_savepoint(session, transaction):
+            if conn.closed:
+                return
+
+            if not conn.in_nested_transaction():
+                conn.sync_connection.begin_nested()
+
         yield async_session
-        await async_session.aclose()
+        await conn.rollback()
 
 
-@pytest.fixture(scope="function", autouse=True)
-def redis_cache():
+def pytest_sessionfinish(session, exitstatus):
+    asyncio.get_event_loop().close()
+
+
+@pytest.fixture(scope="session")
+def event_loop():
+    loop = asyncio.get_event_loop_policy().new_event_loop()
+    yield loop
+
+
+@pytest.fixture(scope="function")
+def cache():
     cache = redis.StrictRedis.from_pool(
         redis.ConnectionPool.from_url(
             f"redis://{secret_settings.redis_host}:{secret_settings.redis_port}"
@@ -59,26 +89,19 @@ def redis_cache():
 
 
 @pytest.fixture(scope="function")
-@pytest.mark.asyncio
-async def client(db, redis_cache):
-    from src.modules.database import database
+async def client(session, cache):
+    def override_database():
+        return session
+
+    def override_cache():
+        return cache
+
+    app.dependency_overrides[database] = override_database
     from src.modules.cache import get_cache
 
-    async for session in db:
+    app.dependency_overrides[get_cache] = override_cache
+    async with AsyncClient(app=app, base_url="http://test") as ac, LifespanManager(app):
+        yield ac
 
-        def override_database():
-            return session
-
-        def override_cache():
-            return redis_cache
-
-        app.dependency_overrides[database] = override_database
-        app.dependency_overrides[get_cache] = override_cache
-
-        async with AsyncClient(app=app, base_url="http://test") as ac, LifespanManager(
-            app
-        ):
-            yield ac
-
-        del app.dependency_overrides[database]
-        del app.dependency_overrides[get_cache]
+    del app.dependency_overrides[database]
+    del app.dependency_overrides[get_cache]
