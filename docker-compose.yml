@@ -1,0 +1,43 @@
+version: "3.8"
+
+services:
+  server:
+    build:
+      dockerfile: Dockerfile
+      context: .
+    command: sh ./start_server.sh
+    volumes:
+      - ~/.aws/:/root/.aws/:ro
+    depends_on:
+      - redis_test
+    container_name: server
+    hostname: server
+    restart: always
+    ports:
+      - "8000"
+
+  redis_test:
+    image: redis
+    platform: linux/arm64
+    container_name: redis_test
+    restart: always
+    ports:
+      - "6379"
+    command: redis-server --appendonly yes
+
+  mysql_test:
+    image: mysql
+    platform: linux/arm64
+    container_name: mysql_test
+    restart: always
+    ports:
+      - "3306"
+    environment:
+      - MYSQL_ROOT_PASSWORD=test
+      - MYSQL_DATABASE=test
+      - MYSQL_USER=test
+      - MYSQL_PASSWORD=test
+      - TZ=Asia/Seoul
+    command:
+      - --character-set-server=utf8mb4
+      - --collation-server=utf8mb4_unicode_ci
