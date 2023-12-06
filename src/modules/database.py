@@ -4,8 +4,14 @@ from typing import Annotated
 from fastapi import Depends
 from sqlalchemy import URL
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
+from sqlalchemy.orm import DeclarativeBase
 
 from src.config import secret_settings
+
+
+class Base(DeclarativeBase):
+    pass
+
 
 database_url = URL(
     drivername="mysql+aiomysql",

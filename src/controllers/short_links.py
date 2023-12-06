@@ -3,6 +3,7 @@ from fastapi import APIRouter
 from src.controllers.dto import GenerateShortUrl
 from src.modules.cache import CacheDepends
 from src.modules.database import AsyncSessionDepends
+from src.services.short_url_service import ShortUrlService
 
 router = APIRouter(prefix="/short-links")
 
@@ -18,11 +19,8 @@ async def _router_generate_short_link(
 async def _router_get_short_link(
     short_id: int, session: AsyncSessionDepends, cache: CacheDepends
 ):
-    key = "short_id"
-    print(f"{key}: ", short_id)
-    await cache.set(key, short_id)
-    print(await cache.get(key))
-    return await cache.get(key)
+    su_serv = ShortUrlService(session, cache)
+    return await su_serv._generate_short_id()
 
 
 @router.get("/r/{short_id}")

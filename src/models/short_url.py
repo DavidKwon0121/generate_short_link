@@ -1,10 +1,12 @@
 from datetime import datetime
 
 from sqlalchemy import String, Text, DateTime, text
-from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
+from sqlalchemy.orm import Mapped, mapped_column
+
+from src.modules.database import Base
 
 
-class ShortUrl(DeclarativeBase):
+class ShortUrl(Base):
     __tablename__ = "short_url"
 
     short_id: Mapped[str] = mapped_column(String(10), primary_key=True)
