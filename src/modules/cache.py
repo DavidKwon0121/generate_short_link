@@ -10,7 +10,7 @@ pool = redis.ConnectionPool.from_url(
 
 
 def get_cache():
-    return redis.Redis.from_pool(pool)
+    return redis.StrictRedis.from_pool(pool)
 
 
 async def cache_depends():
@@ -21,4 +21,4 @@ async def cache_depends():
         await cache.aclose()
 
 
-CacheDepends = Annotated[redis.Redis, Depends(cache_depends)]
+CacheDepends = Annotated[redis.StrictRedis, Depends(cache_depends)]

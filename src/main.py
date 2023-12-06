@@ -10,7 +10,6 @@ router = APIRouter()
 
 @router.get("/", response_model=None)
 async def hello(
-    session: AsyncSessionDepends,
     request: RequestService = Depends(),
 ):
     return PlainTextResponse(
@@ -20,7 +19,6 @@ async def hello(
         f"{request.browser}\n"
         f"{request.device}\n"
         f"{request.os}\n"
-        f"session connected: {session.is_active}"
     )
 
 

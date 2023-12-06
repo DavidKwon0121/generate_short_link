@@ -1,6 +1,8 @@
 import hashlib
 from urllib.parse import urlparse
 
+from sqlalchemy import select
+
 from src import models
 from src.modules.cache import CacheDepends
 from src.modules.database import AsyncSessionDepends
@@ -32,22 +34,26 @@ class ShortUrlService:
         mod_factor = 2821109907456
         return (p * multiple_factor + plus_factor) % mod_factor
 
-    @property
-    def _minimum_size(self) -> int:
+    def _get_minimum_size(self) -> int:
         # 10억개의 short_link 를 만들기 위한 최소 길이
         import math
 
         return math.ceil(math.log(10**10, len(self.chars)))  # 결과는 6
 
+    @property
+    def _minimum_size(self) -> int:
+        # _get_minimum_size 의 결과
+        return 6
+
     def _to_code(self, p: int):
         code = ""
 
-        while p != 0 and len(code) < 6:
+        while p != 0 and len(code) < self._minimum_size:
             ch = self.chars[int(p % len(self.chars))]
             code = ch + code
             p = int(p / len(self.chars))
 
-        code = "a" * (6 - len(code)) + code
+        code = "a" * (self._minimum_size - len(code)) + code
         return code
 
     async def _generate_short_id(self) -> str:
@@ -73,21 +79,23 @@ class ShortUrlService:
         return hashlib.md5(repr(url_dict).encode()).hexdigest()
 
     async def get(self, short_id: str) -> models.ShortUrl | None:
-        return await self.session.get(
-            models.ShortUrl, models.ShortUrl.short_id == short_id
+        return await self.session.scalar(
+            select(models.ShortUrl).where(models.ShortUrl.short_id == short_id)
         )
 
     async def create(self, url_str: str) -> models.ShortUrl:
         result = models.ShortUrl(
-            short_id=self._generate_short_id(),
+            short_id=await self._generate_short_id(),
             url_str=url_str,
             url_hash=self._url_to_hash(url_str),
         )
-        session = self.session
-        await session.flust([result])
+        self.session.add(result)
+        await self.session.flush([result])
         return result
 
     async def find_exist(self, url_str: str) -> models.ShortUrl | None:
-        return await self.session.get(
-            models.ShortUrl, models.ShortUrl.url_hash == self._url_to_hash(url_str)
+        return await self.session.scalar(
+            select(models.ShortUrl).where(
+                models.ShortUrl.url_hash == self._url_to_hash(url_str)
+            )
         )
