@@ -94,7 +94,6 @@ async def test_long_url(client):
     assert get_response.status_code == 200
     assert get_response.json()["data"]["url"] == long_url
 
-    # 생성된 단축 URL로 리다이렉트 요청 (리다이렉트는 따라가지 않음)
     redirect_response = await client.get(f"/short-links/r/{short_id}")
     assert redirect_response.status_code == 302
     assert redirect_response.headers["Location"] == long_url
