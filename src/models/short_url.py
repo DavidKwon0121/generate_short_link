@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from sqlalchemy import String, Text, DateTime, FetchedValue
+from sqlalchemy import String, Text, DateTime, func
 from sqlalchemy.orm import Mapped, mapped_column
 
 from src.modules.database import Base
@@ -8,12 +8,15 @@ from src.modules.database import Base
 
 class ShortUrl(Base):
     __tablename__ = "short_url"
+    __table_args__ = {"extend_existing": True}
 
     short_id: Mapped[str] = mapped_column(String(6), primary_key=True)
     url_str: Mapped[str] = mapped_column(Text, nullable=False)
-    url_hash: Mapped[str] = mapped_column(String(32), nullable=False)
+    url_hash: Mapped[str] = mapped_column(
+        String(32), nullable=False, unique=True, index=True
+    )
     created_at: Mapped[datetime] = mapped_column(
-        DateTime, nullable=False, server_default=FetchedValue()
+        DateTime, nullable=False, default=datetime.utcnow()
     )
 
     def return_camelize(self) -> dict:

@@ -19,7 +19,7 @@ async def _router_create(
     ss = ShortUrlService(session, cache)
     ret = await ss.find_exist(url)
     if not ret:
-        ret = await ss.create(url)
+        ret = ss.create(url)
         await session.commit()
     return JSONResponse(content=ret.return_camelize())
 

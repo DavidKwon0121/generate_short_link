@@ -1,11 +1,10 @@
-from pydantic import BaseModel
+import os
+
 from pydantic_settings import BaseSettings
 
 
-class RedisSettings(BaseModel):
-    host: str = "redis_test"
-    port: int = 6379
-    password: str = None
+def is_on_pytest():
+    return os.getenv("ENV", False) == "TEST"
 
 
 class SecretSettings(BaseSettings):
@@ -14,10 +13,12 @@ class SecretSettings(BaseSettings):
     mysql_host: str
     mysql_dbname: str
     mysql_port: int
-    redis: RedisSettings = RedisSettings()
+
+    redis_host: str
+    redis_port: int
 
     class Config:
-        env_file = f"./.env.test"
+        env_file = "./.env.test" if is_on_pytest() else "./.env"
 
 
 secret_settings = SecretSettings()

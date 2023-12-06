@@ -4,13 +4,11 @@ from typing import Annotated
 from fastapi import Depends
 from sqlalchemy import URL
 from sqlalchemy.ext.asyncio import create_async_engine, async_sessionmaker, AsyncSession
-from sqlalchemy.orm import DeclarativeBase
+from sqlalchemy.orm import declarative_base
 
 from src.config import secret_settings
 
-
-class Base(DeclarativeBase):
-    pass
+Base = declarative_base()
 
 
 database_url = URL(
@@ -24,20 +22,23 @@ database_url = URL(
 )
 
 engine = create_async_engine(
-    database_url, pool_recycle=300, pool_size=10, max_overflow=100
+    database_url,
+    pool_recycle=300,
+    pool_size=10,
+    max_overflow=100,
 )
 
 SessionFactory = async_sessionmaker(bind=engine, expire_on_commit=False)
 
 
 @asynccontextmanager
-async def session():
+async def Session():
     async with SessionFactory() as async_session:
         yield async_session
 
 
 async def database():
-    async with session() as s:
+    async with Session() as s:
         yield s
 
 

@@ -24,7 +24,7 @@ WORKDIR /app
 COPY ./src /app/src/
 COPY ./app.py /app/main.py
 
-COPY ./.env.test /app/.env.test
+COPY ./.env.production /app/.env
 COPY ./start_server.sh /app/start_server.sh
 
 RUN chmod +x start_server.sh

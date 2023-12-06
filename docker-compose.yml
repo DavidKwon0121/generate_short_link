@@ -6,37 +6,36 @@ services:
       dockerfile: Dockerfile
       context: .
     command: sh ./start_server.sh
-    volumes:
-      - ~/.aws/:/root/.aws/:ro
     depends_on:
-      - redis_test
+      - redis_ab180
+      - mysql_ab180
     container_name: server
     hostname: server
     restart: always
     ports:
       - "8080:8000"
 
-  redis_test:
+  redis_ab180:
     image: redis
     platform: linux/arm64
-    container_name: redis_test
+    container_name: redis_ab180
     restart: always
     ports:
       - "6379"
     command: redis-server --appendonly yes
 
-  mysql_test:
+  mysql_ab180:
     image: mysql
     platform: linux/arm64
-    container_name: mysql_test
+    container_name: mysql_ab180
     restart: always
     ports:
       - "33061:3306"
     environment:
-      - MYSQL_ROOT_PASSWORD=test
-      - MYSQL_DATABASE=test
-      - MYSQL_USER=test
-      - MYSQL_PASSWORD=test
+      - MYSQL_ROOT_PASSWORD=ab180
+      - MYSQL_DATABASE=ab180
+      - MYSQL_USER=ab180
+      - MYSQL_PASSWORD=ab180
       - TZ=UTC
     command:
       - --character-set-server=utf8mb4

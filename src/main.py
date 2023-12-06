@@ -2,7 +2,6 @@ from fastapi import APIRouter, FastAPI, Depends
 from starlette.responses import PlainTextResponse
 
 from src.controllers import ROUTERS
-from src.modules.database import AsyncSessionDepends
 from src.services.request_service import RequestService
 
 router = APIRouter()
@@ -22,7 +21,12 @@ async def hello(
     )
 
 
-app = FastAPI()
-app.include_router(router)
-for _router in ROUTERS:
-    app.include_router(_router)
+def create_app():
+    _app = FastAPI()
+    _app.include_router(router)
+    for _router in ROUTERS:
+        _app.include_router(_router)
+    return _app
+
+
+app = create_app()

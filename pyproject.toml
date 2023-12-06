@@ -16,6 +16,12 @@ fastapi = "^0.104.1"
 redis = "^5.0.1"
 
 
+[tool.poetry.group.dev.dependencies]
+pytest = "^7.4.3"
+pytest-asyncio = "^0.23.2"
+asgi-lifespan = "^2.1.0"
+httpx = "^0.25.2"
+
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"

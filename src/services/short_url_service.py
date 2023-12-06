@@ -1,10 +1,11 @@
 import hashlib
+from datetime import datetime
 from urllib.parse import urlparse
 
 from sqlalchemy import select
 
 from src import models
-from src.modules.cache import CacheDepends
+from src.modules.cache import CacheDepends, RedlockManager
 from src.modules.database import AsyncSessionDepends
 
 
@@ -24,6 +25,7 @@ class ShortUrlService:
     def __init__(self, session: AsyncSessionDepends, cache: CacheDepends):
         self.session = session
         self.cache = cache
+        self.dlm = RedlockManager(cache)
 
     @staticmethod
     def _next_pseudo(p: int) -> int:
@@ -56,12 +58,16 @@ class ShortUrlService:
         code = "a" * (self._minimum_size - len(code)) + code
         return code
 
-    async def _generate_short_id(self) -> str:
-        cache = self.cache
-        pseudo = int(await cache.getset(self.pkey, 0))
-
+    def _get_pseudo(self) -> int:
+        lock = self.dlm.get_lock(self.pkey)
+        pseudo = int(self.cache.get(self.pkey) or 0)
         pseudo = self._next_pseudo(pseudo)
-        await cache.set(self.pkey, pseudo)
+        self.cache.set(self.pkey, pseudo)
+        self.dlm.unlock(lock)
+        return pseudo
+
+    def _generate_short_id(self) -> str:
+        pseudo = self._get_pseudo()
         return self._to_code(pseudo)
 
     @staticmethod
@@ -83,14 +89,14 @@ class ShortUrlService:
             select(models.ShortUrl).where(models.ShortUrl.short_id == short_id)
         )
 
-    async def create(self, url_str: str) -> models.ShortUrl:
+    def create(self, url_str: str) -> models.ShortUrl:
         result = models.ShortUrl(
-            short_id=await self._generate_short_id(),
+            short_id=self._generate_short_id(),
             url_str=url_str,
             url_hash=self._url_to_hash(url_str),
+            created_at=datetime.utcnow(),
         )
         self.session.add(result)
-        await self.session.flush([result])
         return result
 
     async def find_exist(self, url_str: str) -> models.ShortUrl | None:
