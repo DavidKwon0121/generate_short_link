@@ -2,7 +2,7 @@ from fastapi import APIRouter, FastAPI, Depends
 from starlette.responses import PlainTextResponse
 
 from src.controllers import ROUTERS
-from src.models.database import AsyncSessionDepends
+from src.modules.database import AsyncSessionDepends
 from src.services.request_service import RequestService
 
 router = APIRouter()

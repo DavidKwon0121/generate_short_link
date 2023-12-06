@@ -8,12 +8,12 @@ readme = "README.md"
 [tool.poetry.dependencies]
 python = "^3.11"
 sqlalchemy = "^2.0.23"
-uvicorn = "^0.24.0.post1"
 pydantic-settings = "^2.1.0"
 aioredis = "^2.0.1"
 user-agents = "^2.2.0"
 aiomysql = "^0.2.0"
 greenlet = "^3.0.1"
+fastapi = "^0.104.1"
 
 
 [build-system]

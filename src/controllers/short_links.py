@@ -1,7 +1,7 @@
 from fastapi import APIRouter
 
 from src.controllers.dto import GenerateShortUrl
-from src.models.database import AsyncSessionDepends
+from src.modules.database import AsyncSessionDepends
 
 router = APIRouter(prefix="/short-links")
 

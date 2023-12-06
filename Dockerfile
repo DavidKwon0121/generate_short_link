@@ -14,6 +14,7 @@ RUN apt update -q && apt install git -qy && \
 COPY ./poetry.lock /app/
 COPY ./pyproject.toml /app/
 
+RUN poetry install --only main -v
 RUN pip install pydantic[dotenv] uvicorn[standard] gunicorn
 
 RUN rm -rf /var/lib/apt/lists/*
@@ -23,7 +24,7 @@ WORKDIR /app
 COPY ./src /app/src/
 COPY ./app.py /app/main.py
 
-COPY ./.env.test /app/
+COPY ./.env.test /app/.env.test
 COPY ./start_server.sh /app/start_server.sh
 
 RUN chmod +x start_server.sh
