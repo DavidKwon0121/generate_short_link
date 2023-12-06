@@ -4,7 +4,7 @@ from pydantic_settings import BaseSettings
 
 class RedisSettings(BaseModel):
     host: str = "localhost"
-    port: int = 63791
+    port: int = 6379
     password: str = None
 
 

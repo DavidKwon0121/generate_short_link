@@ -9,11 +9,11 @@ readme = "README.md"
 python = "^3.11"
 sqlalchemy = "^2.0.23"
 pydantic-settings = "^2.1.0"
-aioredis = "^2.0.1"
 user-agents = "^2.2.0"
 aiomysql = "^0.2.0"
 greenlet = "^3.0.1"
 fastapi = "^0.104.1"
+redis = "^5.0.1"
 
 
 [build-system]
