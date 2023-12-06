@@ -15,8 +15,14 @@ async def _router_generate_short_link(
 
 
 @router.get("/{short_id}")
-async def _router_get_short_link(short_id: str, session: AsyncSessionDepends):
-    pass
+async def _router_get_short_link(
+    short_id: int, session: AsyncSessionDepends, cache: CacheDepends
+):
+    key = "short_id"
+    print(f"{key}: ", short_id)
+    await cache.set(key, short_id)
+    print(await cache.get(key))
+    return await cache.get(key)
 
 
 @router.get("/r/{short_id}")

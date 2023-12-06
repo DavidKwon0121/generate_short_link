@@ -21,4 +21,4 @@ async def cache_depends():
         await cache.aclose()
 
 
-CacheDepends = Annotated[redis.StrictRedis, Depends(cache_depends)]
+CacheDepends = Annotated[redis.Redis, Depends(cache_depends)]
