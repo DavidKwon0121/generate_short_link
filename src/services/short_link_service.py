@@ -1,21 +1,9 @@
-import hashlib
 from datetime import datetime
-from urllib.parse import urlparse
-
 from sqlalchemy import select
 
 from src import models
 from src.modules.cache import CacheDepends, RedlockManager
 from src.modules.database import AsyncSessionDepends
-
-
-def _next_pseudo(p: int) -> int:
-    # generate random value by previous pseudo value
-    # REFERENCE : https://en.wikipedia.org/wiki/Linear_congruential_generator
-    multiple_factor = 6538825
-    plus_factor = 742581238909
-    mod_factor = 2821109907456
-    return (p * multiple_factor + plus_factor) % mod_factor
 
 
 class ShortLinkService:
@@ -70,20 +58,6 @@ class ShortLinkService:
         pseudo = self._get_pseudo()
         return self._to_code(pseudo)
 
-    @staticmethod
-    def _url_to_hash(url_str: str) -> str:
-        parsed_url = urlparse(url_str)
-        url_dict = dict(
-            schema=parsed_url.scheme,
-            hostname=parsed_url.hostname,
-            port=parsed_url.port,
-            path=parsed_url.path,
-            query=parsed_url.query,
-            fragment=parsed_url.fragment,
-            params=parsed_url.params,
-        )
-        return hashlib.md5(repr(url_dict).encode()).hexdigest()
-
     async def get(self, short_id: str) -> models.ShortLink | None:
         return await self.session.scalar(
             select(models.ShortLink).where(models.ShortLink.short_id == short_id)
@@ -93,15 +67,7 @@ class ShortLinkService:
         result = models.ShortLink(
             short_id=self._generate_short_id(),
             url_str=url_str,
-            url_hash=self._url_to_hash(url_str),
             created_at=datetime.utcnow().replace(microsecond=0),
         )
         self.session.add(result)
         return result
-
-    async def find_exist(self, url_str: str) -> models.ShortLink | None:
-        return await self.session.scalar(
-            select(models.ShortLink).where(
-                models.ShortLink.url_hash == self._url_to_hash(url_str)
-            )
-        )

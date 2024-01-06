@@ -12,9 +12,6 @@ class ShortLink(Base):
 
     short_id: Mapped[str] = mapped_column(String(6), primary_key=True)
     url_str: Mapped[str] = mapped_column(Text, nullable=False)
-    url_hash: Mapped[str] = mapped_column(
-        String(32), nullable=False, unique=True, index=True
-    )
     created_at: Mapped[datetime] = mapped_column(
         DateTime, nullable=False, default=datetime.utcnow()
     )

@@ -15,25 +15,6 @@ async def test_create_short_link(client):
 
 
 @pytest.mark.asyncio
-async def test_create_short_link_same_urls(client):
-    test_url = "https://example.com"
-
-    response = await client.post("/short-links", json={"url": test_url})
-    assert response.status_code == 200
-    data = response.json()["data"]
-
-    assert "shortId" in data
-    short_id = data["shortId"]
-    assert data["url"] == test_url
-
-    for _ in range(10):
-        response = await client.post("/short-links", json={"url": test_url})
-        assert response.status_code == 200
-        data = response.json()["data"]
-        assert short_id == data["shortId"]
-
-
-@pytest.mark.asyncio
 async def test_create_short_link_invalid_url(client):
     response = await client.post("/short-links", json={"url": "invalid_url"})
     assert response.status_code == 400
