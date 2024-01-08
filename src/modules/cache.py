@@ -36,7 +36,7 @@ class RedlockManager:
         )
         if lock:
             return lock
-        raise Exception("Fail to get redlock")
+        raise Exception("Fail to achieve lock")
 
     def unlock(self, lock):
         self.redlock.unlock(lock)

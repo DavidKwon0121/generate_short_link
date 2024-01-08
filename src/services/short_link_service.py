@@ -25,14 +25,13 @@ class ShortLinkService:
         return (p * multiple_factor + plus_factor) % mod_factor
 
     def _get_minimum_size(self) -> int:
-        # 10억개의 short_link 를 만들기 위한 최소 길이
+        # least length to generate 10 billions and more short_link
         import math
 
-        return math.ceil(math.log(10**10, len(self.chars)))  # 결과는 6
+        return math.ceil(math.log(10**10, len(self.chars)))  # result is 6
 
     @property
     def _minimum_size(self) -> int:
-        # _get_minimum_size 의 결과
         return 6
 
     def _to_code(self, p: int):

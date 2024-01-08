@@ -1,6 +1,8 @@
 # Created by https://www.toptal.com/developers/gitignore/api/macos,python,pycharm,linux
 # Edit at https://www.toptal.com/developers/gitignore?templates=macos,python,pycharm,linux
 
+.env*
+
 ### Linux ###
 *~
 .idea/

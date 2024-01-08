@@ -10,7 +10,7 @@ from src.services.short_link_service import ShortLinkService
 async def test_is_alphanumeric(session, cache):
     service = ShortLinkService(session, cache)
 
-    # pseudo를 랜덤값으로 초기화
+    # initiate pseudo as a random value
     pseudo = random.randint(0, 10**10)
     cache.set(service.pkey, pseudo)
 
@@ -24,7 +24,7 @@ async def test_controlling_concurrency_to_generate_unique_short_ids(session, cac
     service = ShortLinkService(session, cache)
     generated_ids = set()
 
-    # pseudo를 랜덤값으로 초기화
+    # initiate pseudo as a random value
     pseudo = random.randint(0, 10**10)
     cache.set(service.pkey, pseudo)
 
